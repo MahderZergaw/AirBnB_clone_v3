@@ -1,11 +1,11 @@
-#!/usr/bin/python3
-""" Index file for api/v1
-"""
+from flask import Blueprint, jsonify
 
-from api.v1.views import app_views
+# Create a Blueprint named app_views
+app_views = Blueprint('app_views', __name__)
+
+# Define a route /status on the app_views Blueprint
 
 
-@app_views.route('/status', strict_slashes=False)
+@app_views.route('/status')
 def status():
-    """ return status """
-    return {"status": "OK"}
+    return jsonify({"status": "OK"})
