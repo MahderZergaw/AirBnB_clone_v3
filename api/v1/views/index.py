@@ -14,7 +14,7 @@ from models.state import State
 from models.user import User
 
 
-@app_views.route("/status", methods=["GET"])
+@app_views.route('/status', methods=['GET'], strict_slashes=False)
 def status():
     """Returns the api status in JSON format"""
     return jsonify({"status": "OK"})
