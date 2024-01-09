@@ -25,14 +25,16 @@ class FileStorage:
     __objects = {}
 
     def all(self, cls=None):
-        """returns the dictionary __objects"""
-        if cls is not None:
-            new_dict = {}
-            for key, value in self.__objects.items():
-                if cls == value.__class__ or cls == value.__class__.__name__:
-                    new_dict[key] = value
-            return new_dict
-        return self.__objects
+        """Returns a dictionary of models currently in storage"""
+        if not cls:
+            return FileStorage.__objects
+        else:
+            if type(cls) is str:
+                return {key: value for key, value in
+                        FileStorage.__objects.items() if key.startswith(cls)}
+            return {key: value for key, value in
+                    FileStorage.__objects.items()
+                    if key.startswith(cls.__name__)}
 
     def new(self, obj):
         """sets in __objects the obj with key <obj class name>.id"""
@@ -55,7 +57,7 @@ class FileStorage:
                 jo = json.load(f)
             for key in jo:
                 self.__objects[key] = classes[jo[key]["__class__"]](**jo[key])
-        except:
+        except Exception:
             pass
 
     def delete(self, obj=None):
@@ -66,17 +68,19 @@ class FileStorage:
                 del self.__objects[key]
 
     def close(self):
-        """call reload() method for deserializing the JSON file to
-            objects"""
+        """call reload() method for deserializing the JSON file to objects"""
         self.reload()
 
     def get(self, cls, id):
-        """Returns the object based on the class and its ID, or
-        None if not found"""
-        return self.__objects.get(cls.__name__ + "." + id, None)
+        """Retrieves an object with the specified id"""
+        if cls in classes.values():
+            all_cls_objs = self.all(cls).values()
+
+            for obj in all_cls_objs:
+                if obj.id == id:
+                    return obj
+        return None
 
     def count(self, cls=None):
-        """count the number of objects in storage"""
-        if cls is None:
-            return len(self.__objects)
+        """Returns the number of objects in storage"""
         return len(self.all(cls))
