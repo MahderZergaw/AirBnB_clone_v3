@@ -11,6 +11,4 @@ def api_status():
     '''
     Returns a JSON response for RESTful API health.
     '''
-    response = {'status': 'OK'}
-
-    return jsonify(response)
+    return jsonify({'status': 'OK'})
