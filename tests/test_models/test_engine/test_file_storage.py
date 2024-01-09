@@ -16,7 +16,7 @@ from models.state import State
 from models.user import User
 import json
 import os
-import pep8
+import pycodestyle
 import unittest
 FileStorage = file_storage.FileStorage
 classes = {"Amenity": Amenity, "BaseModel": BaseModel, "City": City,
@@ -30,17 +30,18 @@ class TestFileStorageDocs(unittest.TestCase):
         """Set up for the doc tests"""
         cls.fs_f = inspect.getmembers(FileStorage, inspect.isfunction)
 
-    def test_pep8_conformance_file_storage(self):
-        """Test that models/engine/file_storage.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['models/engine/file_storage.py'])
+    def test_pycodestyle_conformance_file_storage(self):
+        """Test that models/engine/file_storage.py conforms to pycodestyle."""
+        pycodestyles = pycodestyle.StyleGuide(quiet=True)
+        result = pycodestyles.check_files(['models/engine/file_storage.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
 
-    def test_pep8_conformance_test_file_storage(self):
-        """Test tests/test_models/test_file_storage.py conforms to PEP8."""
-        pep8s = pep8.StyleGuide(quiet=True)
-        result = pep8s.check_files(['tests/test_models/test_engine/\
+    def test_pycodestyle_conformance_test_file_storage(self):
+        """Test tests/test_models/test_file_storage.py
+            conforms to pycodestyle."""
+        pycodestyles = pycodestyle.StyleGuide(quiet=True)
+        result = pycodestyles.check_files(['tests/test_models/test_engine/\
 test_file_storage.py'])
         self.assertEqual(result.total_errors, 0,
                          "Found code style errors (and warnings).")
@@ -113,3 +114,28 @@ class TestFileStorage(unittest.TestCase):
         with open("file.json", "r") as f:
             js = f.read()
         self.assertEqual(json.loads(string), json.loads(js))
+
+    def test_count(self, cls=None):
+        """Test that the count method
+        returns the correct number of models """
+        storage = FileStorage()
+        if cls not in set(classes.values()):
+            return
+        init_count = storage.count(cls)
+        newUser = User(first_name="new user 1",
+                       password="new_user_pwd", email="new_user")
+        newUser.save()
+        later_count = storage.count(cls)
+        self.assertTrue(later_count > init_count)
+
+    @unittest.skipIf(os.getenv('HBNB_TYPE_STORAGE') != 'file',
+                     "not testing db storage")
+    def test_get(self):
+        """Tests that the user we retrieved using
+            get() method matches the one we created"""
+        storage = FileStorage()
+        newUser = User(first_name="new user 2",
+                       password="new_user_pwd2", email="new_user@2")
+        newUser.save()
+        retrievedUser = storage.get(User, newUser.id)
+        self.assertTrue(retrievedUser is newUser)
