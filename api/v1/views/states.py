@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """State Objects module"""
-from flask import Flask, jsonify, request, abort
+from flask import Flask, jsonify, request, abort, make_response
 from models import storage
 from api.v1.views import app_views
 from models.state import State
@@ -17,19 +17,18 @@ def get_states():
 def get_state(state_id):
     """Retrieves a State object"""
     state = storage.get(State, state_id)
-    if state:
-        return jsonify(state.to_dict())
-    else:
+    if state is None:
         abort(404)
+    return jsonify(state.to_dict())
 
 
 @app_views.route('/states', methods=['POST'], strict_slashes=False)
 def create_state():
     """Creates a State object"""
     if not request.json:
-        abort(400, 'Not a JSON')
+        return make_response(jsonify({'error': 'Not a JSON'}), 400)
     if 'name' not in request.json:
-        abort(400, 'Missing name')
+        return make_response(jsonify({'error': 'Missing name'}), 400)
     new_state = State(**request.json)
     storage.new(new_state)
     storage.save()
@@ -43,7 +42,7 @@ def update_state(state_id):
     if not state:
         abort(404)
     if not request.json:
-        abort(400, 'Not a JSON')
+        return make_response(jsonify({'error': 'Not a JSON'}), 400)
     ignore_keys = ['id', 'created_at', 'updated_at']
     for key, value in request.json.items():
         if key not in ignore_keys:
