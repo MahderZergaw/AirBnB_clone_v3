@@ -21,7 +21,7 @@ def get_users():
 def get_user(user_id):
     """Retrieves a User object"""
     user = storage.get(User, user_id)
-    if not user:
+    if user is None:
         abort(404)
     return jsonify(user.to_dict())
 
@@ -31,7 +31,7 @@ def get_user(user_id):
 def delete_user(user_id):
     """Deletes a User Object"""
     user = storage.get(User, user_id)
-    if not user:
+    if user is None:
         abort(404)
     storage.delete(user)
     storage.save()
@@ -59,7 +59,7 @@ def create_user():
 def update_user(user_id):
     """Updates a User Object"""
     user = storage.get(User, user_id)
-    if not user:
+    if user is None:
         abort(404)
     if not request.json:
         abort(400, 'Not a JSON')
